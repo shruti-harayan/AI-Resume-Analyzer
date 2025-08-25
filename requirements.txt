@@ -1,0 +1,21 @@
+sentence-transformers==2.2.2
+transformers==4.33.3
+huggingface-hub==0.16.4
+scikit-learn==1.2.2
+pandas==2.2.2
+numpy==1.24.4
+streamlit==1.35.0
+pdfplumber==0.10.4
+python-docx==1.1.0
+scipy==1.10.1
+nltk==3.8.1
+spacy==3.7.2
+unidecode
+
+python -m spacy download en_core_web_sm
+node v22.17.0
+npm 10.9.2
+fastapi
+uvicorn
+
+
