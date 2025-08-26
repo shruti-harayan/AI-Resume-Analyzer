@@ -1,52 +1,80 @@
-from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
-from passlib.context import CryptContext
-from jose import jwt, JWTError
-from datetime import datetime, timedelta
+from fastapi import APIRouter, Depends, HTTPException,status
+from sqlalchemy.orm import Session
+import database
+from models import User
+from schemas import SignupRequest,LoginRequest
+from sqlalchemy.exc import IntegrityError
+from auth_utils import verify_password,create_access_token,get_password_hash
+from datetime import timedelta
 
-router = APIRouter()
-
-# Secret key for signing tokens
-SECRET_KEY = "your_secret_key_here"
-ALGORITHM = "HS256"
+router = APIRouter(prefix="/auth", tags=["auth"])
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Dependency for DB
+def get_db():
+    db = database.SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-# In-memory users DB (replace with real DB later)
-fake_users_db = {}
+@router.post("/signup")
+def signup(payload: SignupRequest, db: Session = Depends(get_db)):
+    email = payload.email
+    password = payload.password
+    role = payload.role
 
-class User(BaseModel):
-    email: str
-    password: str
-    role: str  # "student" or "recruiter"
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-def create_access_token(data: dict, expires_delta: timedelta = None):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-@router.post("/auth/signup")
-def signup(user: User):
-    if user.email in fake_users_db:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    hashed_pw = pwd_context.hash(user.password)
-    fake_users_db[user.email] = {"password": hashed_pw, "role": user.role}
-    return {"msg": "User registered successfully"}
-
-@router.post("/auth/login", response_model=Token)
-def login(user: User):
-    db_user = fake_users_db.get(user.email)
-    if not db_user or not pwd_context.verify(user.password, db_user["password"]):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+    user = db.query(User).filter(User.email == email).first()
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"User with email {email} already registered as {user.role}",
+        )
     
-    access_token = create_access_token(
-        data={"sub": user.email, "role": db_user["role"]}
+    new_user = User(
+        email=email,
+        password=get_password_hash(password),
+        role=role,
     )
+    db.add(new_user)
+    try:
+        db.commit()
+        db.refresh(new_user)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"User with email {email} already exists.",
+        )
+    finally:
+        db.close()
+    return {"message": "User created successfully"}
+
+
+@router.post("/login")
+def login(payload: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == payload.email).first()
+    if not user or not verify_password(payload.password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
+
+    # enforce role match
+    if payload.role and user.role != payload.role:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"This account is registered as {user.role}, not {payload.role}",
+        )
+
+    # create JWT
+    access_token = create_access_token(
+        data={"sub": user.email, "role": user.role},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+
+    print("DB password:", user.password)
+    print("Entered password:", payload.password)
+    print("Verify:", verify_password(payload.password, user.password))
+
     return {"access_token": access_token, "token_type": "bearer"}
