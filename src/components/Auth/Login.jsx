@@ -69,7 +69,7 @@ function Login() {
           required
         />
         <button
-          type="submit"
+          type="button"
           onClick={() => setShowPassword(!showPassword)}
           className="absolute right-3 top-2.5 text-sm text-indigo-600 dark:text-indigo-400 hover:underline focus:outline-none"
         >
@@ -101,3 +101,4 @@ function Login() {
 }
 
 export default Login;
+
