@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function Signup() {
   const { signup } = useContext(AuthContext);
@@ -11,6 +12,8 @@ function Signup() {
   const [signing, setSigning] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSigning(true);
@@ -19,6 +22,9 @@ function Signup() {
     try {
       const res = await signup(email, password, role);
       setSuccess(res.message);
+      setTimeout(() => {
+      navigate("/login");
+    }, 1000);
     } catch (err) {
       setError(err.message); // shows "User already registered..." etc.
     }
