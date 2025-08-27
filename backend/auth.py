@@ -73,8 +73,4 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
 
-    print("DB password:", user.password)
-    print("Entered password:", payload.password)
-    print("Verify:", verify_password(payload.password, user.password))
-
     return {"access_token": access_token, "token_type": "bearer"}
