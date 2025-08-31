@@ -37,7 +37,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            
           </Routes>
         </Layout>
       </Router>

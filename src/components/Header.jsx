@@ -1,9 +1,15 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 function Header({ darkMode, setDarkMode }) {
   const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/"); // Redirect to homepage after logout
+  };
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-md">
@@ -21,12 +27,16 @@ function Header({ darkMode, setDarkMode }) {
           <Link to="/" className="hover:text-indigo-500">
             Home
           </Link>
-          <Link to="/student" className="hover:text-indigo-500">
-            Student
-          </Link>
-          <Link to="/recruiter" className="hover:text-indigo-500">
-            Recruiter
-          </Link>
+          {user && user.role === "student" && (
+            <Link to="/student" className="hover:text-indigo-500">
+              Student Dashboard
+            </Link>
+          )}
+          {user && user.role === "recruiter" && (
+            <Link to="/recruiter" className="hover:text-indigo-500">
+              Recruiter Dashboard
+            </Link>
+          )}
           <Link to="/scoring-transparency" className="hover:text-indigo-500">
             How Scoring Works
           </Link>
@@ -36,7 +46,7 @@ function Header({ darkMode, setDarkMode }) {
         <div className="flex items-center space-x-4">
           {user ? (
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
             >
               Logout

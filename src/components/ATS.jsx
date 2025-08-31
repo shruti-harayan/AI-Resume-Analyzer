@@ -1,11 +1,55 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 function ATS() {
   const [resume, setResume] = useState(null);
   const [jd, setJd] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const [saveStatus, setSaveStatus] = useState("");
+  const [resumeText, setResumeText] = useState("");
+
+  const handleSaveResume = async () => {
+  if (!result) {
+    setSaveStatus("Please calculate ATS score before saving.");
+    return;
+  }
+
+  console.log("Saving resume with payload:", {
+    student_email: user.email,
+    ats_score: result.score,
+    resume_text: resumeText,
+    similarity: result.details?.similarity,
+    keyword_overlap: result.details?.keyword_overlap,
+    strictness_factor_applied: result.details?.strictness_factor_applied,
+    matched_skills: result.matched_skills?.join(","),
+    missing_skills: result.missing_skills?.join(","),
+  });
+
+  try {
+    const res =await axios.post("http://localhost:8000/resume/save", {
+      student_email: user.email,
+      ats_score: result.score,
+      resume_text: resumeText,
+      similarity: result.details?.similarity,
+      keyword_overlap: result.details?.keyword_overlap,
+      strictness_factor_applied: result.details?.strictness_factor_applied,
+      matched_skills: result.matched_skills?.join(","),
+      missing_skills: result.missing_skills?.join(","),
+    });
+
+    if (res.data.message === "Resume saved successfully") {
+      setSaveStatus("Resume saved successfully!");
+      alert("Resume saved successfully!");
+    } else {
+      setSaveStatus("Could not save resume.");
+    }
+  } catch (error) {
+    setSaveStatus("Could not save resume.");
+  }
+};
 
   const handleUpload = (e) => {
     setResume(e.target.files[0]);
@@ -27,6 +71,9 @@ function ATS() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setResult(res.data);
+      
+      setResumeText(res.data.resume_text || ""); 
+    
     } catch (err) {
       console.error(err);
       alert("Error analyzing resume");
@@ -181,6 +228,15 @@ function ATS() {
               </div>
             )}
 
+            <button
+              onClick={handleSaveResume}
+              disabled={!result}
+              className={`bg-indigo-600 text-white rounded px-4 py-2 mt-4 hover:bg-indigo-700 ${
+                !result ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              Save Resume
+            </button>
           </div>
         )}
       </div>
