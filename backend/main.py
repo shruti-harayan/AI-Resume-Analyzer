@@ -1,15 +1,11 @@
 from fastapi import FastAPI, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 import ats_scoring as ats
-import pdfplumber
-import docx
-import io
+import pdfplumber,docx,models,database,io,uvicorn
 from auth import router as auth_router
-
+from resume import router as resume_router
 
 app = FastAPI()
-app.include_router(auth_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,6 +14,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.include_router(auth_router)
+models.Base.metadata.create_all(bind=database.engine)
+app.include_router(resume_router)
+
 
 def parse_file(uploaded_file: UploadFile):
     """Parse text from PDF or DOCX."""
@@ -66,6 +68,7 @@ async def analyze_resume(resume: UploadFile, jd: str = Form(...)):
 
     return {
         "score": result["score"],
+        "resume_text": resume_text,
         "details": {
             "similarity": result["similarity"],
             "keyword_overlap": result["keyword_overlap"],

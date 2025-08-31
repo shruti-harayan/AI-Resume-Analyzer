@@ -1,0 +1,63 @@
+from fastapi import APIRouter, Depends, HTTPException, status,Request
+from sqlalchemy.orm import Session
+import database
+from models import Resume
+from typing import List
+from pydantic import BaseModel
+from datetime import datetime
+
+router = APIRouter(prefix="/resume", tags=["resume"])
+
+def get_db():
+    db = database.SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# Pydantic schema for response
+class ResumeOut(BaseModel):
+    id: int
+    student_email: str
+    ats_score: float
+    resume_text: str | None
+    upload_time: datetime
+    similarity: float | None
+    keyword_overlap: float | None
+    strictness_factor_applied: str | None
+    matched_skills: str | None
+    missing_skills: str | None
+
+    class Config:
+        from_attributes = True
+
+@router.post("/save")
+def save_resume(payload: dict, db: Session = Depends(get_db)):
+    try:
+        resume = Resume(
+            student_email=payload["student_email"],
+            ats_score=payload["ats_score"],
+            resume_text=payload.get("resume_text", ""),
+            similarity=payload.get("similarity"),
+            keyword_overlap=payload.get("keyword_overlap"),
+            strictness_factor_applied=payload.get("strictness_factor_applied"),
+            matched_skills=payload.get("matched_skills"),
+            missing_skills=payload.get("missing_skills"),
+        )
+        db.add(resume)
+        db.commit()
+        db.refresh(resume)
+        return {"message": "Resume saved successfully", "id": resume.id}
+    except Exception as e:
+        db.rollback()
+        return {"error": f"Failed to save resume: {str(e)}"}
+
+
+@router.get("/list", response_model=List[ResumeOut])
+def list_resumes(db: Session = Depends(get_db)):
+    try:
+        resumes = db.query(Resume).all()
+        return resumes
+    except Exception as e:
+        print(f"Error fetching resumes: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
