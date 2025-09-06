@@ -46,7 +46,9 @@ function RecruiterDashboard() {
               <tr key={resume.id}>
                 <td className="border border-gray-300 px-2 py-1">{resume.student_email}</td>
                 <td className="border border-gray-300 px-2 py-1">{resume.ats_score.toFixed(2)}%</td>
-                <td className="border border-gray-300 px-2 py-1">{new Date(resume.upload_time).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
+                <td className="border border-gray-300 px-2 py-1">{(() => {let t = resume.upload_time;
+                if (typeof t === "string" && !t.endsWith('Z') && !t.includes('+')) t += "Z";
+                  return new Date(t).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });})()}</td>
                 <td className="border border-gray-300 px-2 py-1">{resume.matched_skills || "N/A"}</td>
                 <td className="border border-gray-300 px-2 py-1">{resume.missing_skills || "N/A"}</td>
                 <td className="border border-gray-300 px-2 py-1 max-w-xs truncate">{resume.resume_text || "N/A"}</td>
