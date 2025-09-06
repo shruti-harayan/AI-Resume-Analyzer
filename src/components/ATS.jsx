@@ -12,24 +12,12 @@ function ATS() {
   const [resumeText, setResumeText] = useState("");
 
   const handleSaveResume = async () => {
-  if (!result) {
-    setSaveStatus("Please calculate ATS score before saving.");
-    return;
-  }
+    if (!result) {
+      setSaveStatus("Please calculate ATS score before saving.");
+      return;
+    }
 
-  console.log("Saving resume with payload:", {
-    student_email: user.email,
-    ats_score: result.score,
-    resume_text: resumeText,
-    similarity: result.details?.similarity,
-    keyword_overlap: result.details?.keyword_overlap,
-    strictness_factor_applied: result.details?.strictness_factor_applied,
-    matched_skills: result.matched_skills?.join(","),
-    missing_skills: result.missing_skills?.join(","),
-  });
-
-  try {
-    const res =await axios.post("http://localhost:8000/resume/save", {
+    console.log("Saving resume with payload:", {
       student_email: user.email,
       ats_score: result.score,
       resume_text: resumeText,
@@ -38,18 +26,32 @@ function ATS() {
       strictness_factor_applied: result.details?.strictness_factor_applied,
       matched_skills: result.matched_skills?.join(","),
       missing_skills: result.missing_skills?.join(","),
+      file_path: result.file_path
     });
 
-    if (res.data.message === "Resume saved successfully") {
-      setSaveStatus("Resume saved successfully!");
-      alert("Resume saved successfully!");
-    } else {
+    try {
+      const res = await axios.post("http://localhost:8000/resume/save", {
+        student_email: user.email,
+        ats_score: result.score,
+        resume_text: resumeText,
+        similarity: result.details?.similarity,
+        keyword_overlap: result.details?.keyword_overlap,
+        strictness_factor_applied: result.details?.strictness_factor_applied,
+        matched_skills: result.matched_skills?.join(","),
+        missing_skills: result.missing_skills?.join(","),
+        file_path: result.file_path
+      });
+
+      if (res.data.message === "Resume saved successfully") {
+        setSaveStatus("Resume saved successfully!");
+        alert("Resume saved successfully!");
+      } else {
+        setSaveStatus("Could not save resume.");
+      }
+    } catch (error) {
       setSaveStatus("Could not save resume.");
     }
-  } catch (error) {
-    setSaveStatus("Could not save resume.");
-  }
-};
+  };
 
   const handleUpload = (e) => {
     setResume(e.target.files[0]);
@@ -71,9 +73,8 @@ function ATS() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setResult(res.data);
-      
-      setResumeText(res.data.resume_text || ""); 
-    
+
+      setResumeText(res.data.resume_text || "");
     } catch (err) {
       console.error(err);
       alert("Error analyzing resume");
@@ -151,7 +152,7 @@ function ATS() {
             <div>
               <p className="font-semibold text-green-600">Matched Skills:</p>
               <div className="flex flex-wrap gap-2 mt-1">
-                {result.matched_skills.length > 0 ? (
+                {result.matched_skills && result.matched_skills.length > 0 ? (
                   result.matched_skills.map((skill, idx) => (
                     <span
                       key={idx}
@@ -161,7 +162,9 @@ function ATS() {
                     </span>
                   ))
                 ) : (
-                  <span className="text-gray-500 dark:text-gray-400">None</span>
+                  <span className="text-gray-500 dark:text-gray-400">
+                    No matched skills found
+                  </span>
                 )}
               </div>
             </div>
@@ -169,7 +172,7 @@ function ATS() {
             <div>
               <p className="font-semibold text-red-600">Missing Skills:</p>
               <div className="flex flex-wrap gap-2 mt-1">
-                {result.missing_skills.length > 0 ? (
+                {result.missing_skills?.length > 0 ? (
                   result.missing_skills.map((skill, idx) => (
                     <span
                       key={idx}
@@ -203,13 +206,13 @@ function ATS() {
             </div>
 
             {/* Warnings */}
-            {(result.warnings.length > 0 || result.experience_gap) && (
+            {(result.warnings?.length > 0 || result.experience_gap) && (
               <div className="p-6 rounded-xl bg-red-50 dark:bg-red-900 border-l-4 border-red-500 shadow md:col-span-2">
                 <h3 className="font-semibold text-red-700 dark:text-red-300 mb-2">
                   ⚠️ Warnings (Critical Issues)
                 </h3>
                 <ul className="list-disc list-inside text-gray-700 dark:text-gray-200 space-y-1">
-                  {result.warnings.map((warn, idx) => (
+                  {result.warnings?.map((warn, idx) => (
                     <li key={idx}>{warn}</li>
                   ))}
                 </ul>
