@@ -14,6 +14,10 @@ function Signup() {
 
   const navigate = useNavigate();
 
+  const handleBack = () => {
+    navigate("/");  // Redirect to homepage
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSigning(true);
@@ -33,6 +37,19 @@ function Signup() {
 
   return (
     <div className="max-w-md mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mt-12">
+      <button
+        onClick={handleBack}
+        className="
+          absolute top-4 left-4 flex items-center gap-2
+          font-bold text-indigo-700
+          dark:text-indigo-300
+          hover:text-indigo-900 dark:hover:text-indigo-100
+          focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded
+          "
+        aria-label="Back to homepage"
+      >
+        <span role="img" aria-label="left arrow">⬅️</span> BACK
+      </button>
       <h2 className="text-2xl font-bold text-center mb-6">Signup</h2>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {success && <p className="text-green-500 mb-4">{success}</p>}
