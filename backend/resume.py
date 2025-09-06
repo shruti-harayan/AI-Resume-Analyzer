@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status,Request
+from fastapi import APIRouter, Depends, HTTPException, status,Request,Path
 from sqlalchemy.orm import Session
 import database
 from models import Resume
 from typing import List
 from pydantic import BaseModel
 from datetime import datetime
+from fastapi.responses import FileResponse
 
 router = APIRouter(prefix="/resume", tags=["resume"])
 
@@ -43,6 +44,7 @@ def save_resume(payload: dict, db: Session = Depends(get_db)):
             strictness_factor_applied=payload.get("strictness_factor_applied"),
             matched_skills=payload.get("matched_skills"),
             missing_skills=payload.get("missing_skills"),
+            file_path=payload.get("file_path")
         )
         db.add(resume)
         db.commit()
@@ -61,3 +63,12 @@ def list_resumes(db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Error fetching resumes: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+@router.get("/download/{resume_id}")
+def download_resume(resume_id: int, db: Session = Depends(get_db)):
+    resume_record = db.query(Resume).filter(Resume.id == resume_id).first()
+    if not resume_record or not getattr(resume_record, "file_path", None):
+        raise HTTPException(status_code=404, detail="Resume file not found.")
+    return FileResponse(resume_record.file_path, filename=f"resume_{resume_record.student_email}.pdf")
+

@@ -20,7 +20,7 @@ class Resume(Base):
     id = Column(Integer, primary_key=True, index=True)
     student_email = Column(String, ForeignKey("users.email"), nullable=False) 
     ats_score = Column(Float, nullable=False)
-    resume_text = Column(String, nullable=True)         # Store full parsed resume text
+    file_path = Column(String, nullable=True)
     upload_time = Column(DateTime, default=lambda: datetime.now(timezone.utc)) # timestamp for when saved
     # store ATS subfields (similarity, matched_skills, etc.)
     similarity = Column(Float, nullable=True)
@@ -28,6 +28,7 @@ class Resume(Base):
     strictness_factor_applied = Column(String, nullable=True)
     matched_skills = Column(String, nullable=True)   # CSV string of skills
     missing_skills = Column(String, nullable=True)   # CSV string of skills
+    resume_text = Column(String, nullable=True)         # Store full parsed resume text
 
     # relationship
     student = relationship("User", backref="resumes")
