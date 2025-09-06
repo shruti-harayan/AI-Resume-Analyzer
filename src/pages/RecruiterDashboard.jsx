@@ -107,7 +107,7 @@ function RecruiterDashboard() {
                 <th className="px-4 py-2 text-left">Upload Time</th>
                 <th className="px-4 py-2 text-left">Matched Skills</th>
                 <th className="px-4 py-2 text-left">Missing Skills</th>
-                <th className="px-4 py-2 text-left">Resume Preview</th>
+                <th className="px-4 py-2 text-left">Experience Level</th>
                 <th className="px-4 py-2 text-left">Actions</th>
               </tr>
             </thead>
@@ -141,10 +141,13 @@ function RecruiterDashboard() {
                   <td className="px-4 py-2 text-red-500">
                     {resume.missing_skills || "N/A"}
                   </td>
-                  <td className="px-4 py-2 max-w-xs truncate text-gray-500">
-                    {resume.resume_text
-                      ? resume.resume_text.substring(0, 40) + "..."
-                      : "N/A"}
+                  <td className="border border-gray-300 px-2 py-1">
+                    {resume.experience_gap == null ||
+                    resume.experience_gap === ""
+                      ? "No experience gap"
+                      : Number(resume.experience_gap) >= 3
+                      ? "3+ years"
+                      : "Fresher"}
                   </td>
                   <td className="px-4 py-2 space-x-2">
                     <button
@@ -154,11 +157,11 @@ function RecruiterDashboard() {
                       View
                     </button>
                     <button
-                      className="bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 transition"
+                      className="bg-green-600 text-white rounded px-3 py-1"
                       onClick={() =>
-                        downloadResume(
-                          resume.resume_text,
-                          `resume-${resume.student_email}.txt`
+                        window.open(
+                          `http://localhost:8000/resume/download/${resume.id}`,
+                          "_blank"
                         )
                       }
                     >
