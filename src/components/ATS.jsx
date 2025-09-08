@@ -26,7 +26,17 @@ function ATS() {
       strictness_factor_applied: result.details?.strictness_factor_applied,
       matched_skills: result.matched_skills?.join(","),
       missing_skills: result.missing_skills?.join(","),
-      file_path: result.file_path
+      file_path: result.file_path,
+      experience_gap: Array.isArray(result.experience_gap)
+        ? result.experience_gap.join("; ")
+        : typeof result.experience_gap === "string"
+        ? result.experience_gap
+        : "",
+      overqualified: Array.isArray(result.overqualified)
+        ? result.overqualified.join("; ")
+        : typeof result.overqualified === "string"
+        ? result.overqualified
+        : "",
     });
 
     try {
@@ -39,7 +49,13 @@ function ATS() {
         strictness_factor_applied: result.details?.strictness_factor_applied,
         matched_skills: result.matched_skills?.join(","),
         missing_skills: result.missing_skills?.join(","),
-        file_path: result.file_path
+        file_path: result.file_path,
+        experience_gap: Array.isArray(result.experience_gap)
+          ? result.experience_gap.join("; ")
+          : result.experience_gap || "",
+        overqualified: Array.isArray(result.overqualified)
+          ? result.overqualified.join("; ")
+          : result.overqualified || "",
       });
 
       if (res.data.message === "Resume saved successfully") {
@@ -137,15 +153,20 @@ function ATS() {
             </div>
 
             {/* Experience Gap  */}
-            {result.experience_gap && (
-              <div className="p-6 rounded-xl bg-white dark:bg-gray-800 shadow md:col-span-2">
-                <h3 className="font-semibold text-red-600 mb-2">
+            {Array.isArray(result.experience_gap) &&
+            result.experience_gap.length > 0 ? (
+              <div>
+                <span className="font-semibold text-red-600">
                   ⚠️ Experience Gap
-                </h3>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {result.experience_gap}
-                </p>
+                </span>
+                <ul className="mt-1 text-red-700 dark:text-red-200">
+                  {result.experience_gap.map((msg, idx) => (
+                    <li key={idx}>{msg}</li>
+                  ))}
+                </ul>
               </div>
+            ) : (
+              <span className="text-green-600">No experience gap detected</span>
             )}
 
             {/* Matched / Missing Skills */}
@@ -206,13 +227,13 @@ function ATS() {
             </div>
 
             {/* Warnings */}
-            {(result.warnings?.length > 0 || result.experience_gap) && (
+            {result.warnings?.length > 0 && (
               <div className="p-6 rounded-xl bg-red-50 dark:bg-red-900 border-l-4 border-red-500 shadow md:col-span-2">
                 <h3 className="font-semibold text-red-700 dark:text-red-300 mb-2">
                   ⚠️ Warnings (Critical Issues)
                 </h3>
                 <ul className="list-disc list-inside text-gray-700 dark:text-gray-200 space-y-1">
-                  {result.warnings?.map((warn, idx) => (
+                  {result.warnings.map((warn, idx) => (
                     <li key={idx}>{warn}</li>
                   ))}
                 </ul>
@@ -220,16 +241,19 @@ function ATS() {
             )}
 
             {/* Notes */}
-            {result.overqualified_gap && (
-              <div className="p-6 rounded-xl bg-yellow-50 dark:bg-yellow-800 border-l-4 border-yellow-500 shadow md:col-span-2">
-                <h3 className="font-semibold text-yellow-700 dark:text-yellow-200 mb-2">
-                  💡 Notes (Additional Observations)
-                </h3>
-                <p className="text-gray-700 dark:text-gray-200">
-                  {result.overqualified_gap}
-                </p>
-              </div>
-            )}
+            {Array.isArray(result.overqualified) &&
+              result.overqualified.length > 0 && (
+                <div>
+                  <span className="font-semibold text-yellow-600">
+                    ⚠️ Overqualified Warning
+                  </span>
+                  <ul className="mt-1 text-yellow-700 dark:text-yellow-200">
+                    {result.overqualified.map((msg, idx) => (
+                      <li key={idx}>{msg}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
             <button
               onClick={handleSaveResume}
