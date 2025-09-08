@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status,Request,Path
 from sqlalchemy.orm import Session
+from ats_scoring import classify_experience_level
 import database
 from models import Resume
 from typing import List
@@ -28,6 +29,7 @@ class ResumeOut(BaseModel):
     strictness_factor_applied: str | None
     matched_skills: str | None
     missing_skills: str | None
+    experience_level: str | None  
 
     class Config:
         from_attributes = True
@@ -35,6 +37,16 @@ class ResumeOut(BaseModel):
 @router.post("/save")
 def save_resume(payload: dict, db: Session = Depends(get_db)):
     try:
+        experience_level = classify_experience_level(payload.get("resume_text", ""))
+        
+        overqual = payload.get("overqualified", [])
+        if isinstance(overqual, list):
+            overqual_str = "; ".join(overqual)
+        elif isinstance(overqual, str):
+            overqual_str = overqual
+        else:
+            overqual_str = ""
+            
         resume = Resume(
             student_email=payload["student_email"],
             ats_score=payload["ats_score"],
@@ -44,7 +56,9 @@ def save_resume(payload: dict, db: Session = Depends(get_db)):
             strictness_factor_applied=payload.get("strictness_factor_applied"),
             matched_skills=payload.get("matched_skills"),
             missing_skills=payload.get("missing_skills"),
-            file_path=payload.get("file_path")
+            file_path=payload.get("file_path"),
+            experience_level=experience_level,
+            overqualified_msgs=overqual_str
         )
         db.add(resume)
         db.commit()

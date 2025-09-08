@@ -29,6 +29,8 @@ class Resume(Base):
     matched_skills = Column(String, nullable=True)   # CSV string of skills
     missing_skills = Column(String, nullable=True)   # CSV string of skills
     resume_text = Column(String, nullable=True)         # Store full parsed resume text
+    experience_level = Column(String, nullable=True)
+    overqualified_msgs = Column(String, nullable=True)
 
     # relationship
     student = relationship("User", backref="resumes")

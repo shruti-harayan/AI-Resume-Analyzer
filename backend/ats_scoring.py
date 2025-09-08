@@ -117,6 +117,32 @@ def calc_similarity(text1, text2):
     return max(0.0, min(1.0, sim))
 
 
+def has_internship_keywords(text):
+    internship_terms = {"internship", "intern", "interned", "trainee", "apprentice"}
+    text_lower = text.lower()
+    return any(term in text_lower for term in internship_terms)
+
+def classify_experience_level(resume_text):
+    periods = extract_experience_periods(resume_text)
+    total_years = calc_experience_years(periods)
+    
+    internship_flag = has_internship_keywords(resume_text)
+
+    if internship_flag and total_years < 1:
+        return "Internships"
+    if total_years < 1:
+        return "Fresher"
+    if 1 <= total_years <= 2:
+        return "Entry level"
+    if 3 <= total_years <= 5:
+        return "Mid level"
+    if 6 <= total_years < 10:
+        return "Senior level"
+    if total_years >= 10:
+        return "Experienced"
+    return "Unknown"
+
+
 def extract_experience_periods(text):
     """Find experience periods as pairs: [(start, end), ...]"""
     months = {"jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6,
