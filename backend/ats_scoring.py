@@ -103,7 +103,9 @@ def extract_dynamic_skills(text, master_skills=MASTER_SKILL_LIST):
         skill_lower = skill.lower()
         if skill_lower in NOISE_WORDS:
             continue
-        if re.search(r'\b' + re.escape(skill_lower) + r'\b', text_lower):
+        # Escape regex special characters in skill
+        pattern = r'\b' + re.escape(skill_lower) + r'\b'
+        if re.search(pattern, text_lower):
             found.add(skill_lower)
     return found
 
@@ -115,39 +117,51 @@ def calc_similarity(text1, text2):
     return max(0.0, min(1.0, sim))
 
 
-
-def extract_experience_from_dates(text):
-    """Parse job timelines like 'Aug 2015 – Present' or '01/2018 - 07/2020' and estimate total YOE."""
-    months = {
-        "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
-        "jul": 7, "aug": 8, "sep": 9, "sept": 9, "oct": 10, "nov": 11, "dec": 12
-    }
-
-    # Match "Aug 2015", "January 2018", or "05/2015"
-    date_regex = re.findall(r"([A-Za-z]{3,9})\s+(\d{4})|(\d{1,2})/(\d{4})", text)
-
+def extract_experience_periods(text):
+    """Find experience periods as pairs: [(start, end), ...]"""
+    months = {"jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6,
+              "jul":7, "aug":8, "sep":9, "sept":9, "oct":10, "nov":11, "dec":12 }
+    # Match formats: "Aug 2015", "05/2015"
+    matches = re.findall(r"([A-Za-z]{3,9})\s+(\d{4})|(\d{1,2})/(\d{4})", text)
     dates = []
-    for match in date_regex:
-        if match[0]:  # Month name + Year
-            month = months.get(match[0].lower()[:3])
-            year = int(match[1])
-            if month and year:
-                dates.append(datetime(year, month, 1))
-        elif match[2]:  # Numeric month/year
-            month = int(match[2])
-            year = int(match[3])
-            if month and year:
-                dates.append(datetime(year, month, 1))
-
-    total_years = 0
-    # Assume pairs of [start, end]
+    for m in matches:
+        if m[0]:
+            month = months.get(m[0][:3].lower())
+            year = int(m[1])
+            if month: dates.append(datetime(year, month, 1))
+        elif m[2]:
+            month = int(m[2])
+            year = int(m[3])
+            dates.append(datetime(year, month, 1))
+    # Build experience periods as [start, end] pairs
+    periods = []
     for i in range(0, len(dates), 2):
         start = dates[i]
         end = dates[i+1] if i+1 < len(dates) else datetime.now()
-        diff_years = (end - start).days / 365
-        total_years += diff_years
+        if start > end: continue
+        periods.append([start, end])
+    return periods
 
-    return round(total_years)
+def calc_experience_years(periods):
+    """Sum total years of all periods, ignoring overlaps."""
+    total = 0
+    for start, end in periods:
+        years = (end - start).days / 365.0
+        if years > 0:
+            total += years
+    return round(total, 1)
+
+def extract_skill_experience(text):
+    exp_skill = {}
+    # Skip generic "for this role"/"for this job"
+    generic_words = {"role", "job", "position", "for", "this", "the", "in", "with"}
+    pattern = r"(\d+)\s*\+?\s*(?:years?|yrs?|yoe)\s+(?:of\s+experience\s+)?(?:in|with|for)?\s*([a-zA-Z0-9_]+)"
+    matches = re.findall(pattern, text, re.IGNORECASE)
+    for years, skill in matches:
+        skill_name = skill.strip().lower()
+        if skill_name and skill_name not in generic_words:
+            exp_skill[skill_name] = int(years)
+    return exp_skill
 
 
 def detect_numeric_experience(text):
@@ -157,33 +171,29 @@ def detect_numeric_experience(text):
 
 
 def check_experience_gap(resume_text, jd_text):
-    """
-    Compare JD required experience vs resume years of experience.
-    Returns: exp_gap_message, overqualified_message
-    """
-
-    # JD requirement
-    exp_req = detect_numeric_experience(jd_text)
-    # Resume experience (try numeric first, then dates)
-    resume_years = detect_numeric_experience(resume_text)
-    if not resume_years:
-        resume_years = extract_experience_from_dates(resume_text)
-
-    exp_gap = None
-    overqualified = None
-
-    if exp_req:
-        if not resume_years or resume_years < exp_req:
-            exp_gap = (
-                f"JD requires {exp_req}+ years of experience, "
-                f"but resume shows only {resume_years or 0} years."
-            )
-        elif resume_years > exp_req + 5:  
-            overqualified = (
-                f"Resume shows {resume_years} years, "
-                f"while JD requires only {exp_req}+ years. "
-                "You may be considered overqualified."
-            )
+    jd_exp_skill = extract_skill_experience(jd_text)  # {skill: years}
+    resume_exp_skill = extract_skill_experience(resume_text)  # {skill: years}
+    exp_gap = []
+    overqualified = []
+    periods = extract_experience_periods(resume_text)
+    total_years = calc_experience_years(periods)
+    
+    # Skill-specific JD requirement
+    if jd_exp_skill:
+        for skill, req in jd_exp_skill.items():
+            cand_years = resume_exp_skill.get(skill, 0)
+            if cand_years < req:
+                exp_gap.append(f"JD requires {req}+ years in {skill}, but resume shows {cand_years}.")
+            elif cand_years > req + 5:
+                overqualified.append(f"Resume shows {cand_years} years in {skill}: overqualified for JD requiring {req}+.")
+    # Fallback: JD has numeric experience requirement, but no skill
+    else:
+        req = detect_numeric_experience(jd_text) or 0
+        if req > 0:  # JD requires at least some experience
+            if total_years < req:
+                exp_gap.append(f"JD requires {req}+ years overall; resume shows {total_years}.")
+            elif total_years > req + 5:
+                overqualified.append(f"Resume has {total_years} years; JD only requires {req}+.")
 
     return exp_gap, overqualified
 
@@ -226,17 +236,15 @@ def ats_score_dynamic(resume_text, jd_text, sim_weight=0.5, key_weight=0.5, top_
         "jd_skills": list(jd_skills),
         "experience_gap": exp_gap,   
         "overqualified": overqualified,
-        "tips": get_recommendations(missing_skills, sim, overlap,score),
+        "tips": get_recommendations(missing_skills, sim, overlap,score*100 if score < 2 else score),
     }
 
 #a human-friendly explanation for the given ATS score and details.
-def explain_ats_score(score, details, matched_skills, missing_skills, jd_skills):
+def explain_ats_score(score, details, matched_skills, missing_skills, jd_skills, experience_gap=None):
     explanation = []
-
     # Case 1: No skill overlap at all
     if len(jd_skills) == 0:
-        return "No recognizable skills were extracted from the job description. Please ensure the JD is properly formatted and the skills CSV is comprehensive."
-    
+        return "No recognizable skills were extracted from the job description. Please ensure the JD is properly formatted."
     if len(matched_skills) == 0:
         explanation.append(
             "⚠️ None of the required skills in the job description were found in your resume. This triggers a strict mismatch penalty, and the score reflects a low compatibility."
@@ -248,7 +256,6 @@ def explain_ats_score(score, details, matched_skills, missing_skills, jd_skills)
             explanation.append(
                 f"Some general experience overlaps were detected (semantic similarity: {details['similarity']:.2f}), but core skills did not match."
             )
-    
     # Case 2: Partial skill match
     elif len(matched_skills) > 0 and details['keyword_overlap'] < 0.6:
         explanation.append(
@@ -260,16 +267,27 @@ def explain_ats_score(score, details, matched_skills, missing_skills, jd_skills)
         explanation.append(
             f"Semantic similarity is moderate ({details['similarity']:.2f}), indicating partial relevance, but not all skills are covered."
         )
-    
     # Case 3: High skill match
     elif details['keyword_overlap'] >= 0.6:
         explanation.append(
             f"✅ Most required skills matched: {', '.join(matched_skills)}."
         )
-        explanation.append(
-            f"Your resume is a close fit to the job description's requirements! ATS score is high due to both strong skill coverage and semantic relevance."
-        )
-        
+        # Add gap warning if present or score is low
+        if experience_gap and (isinstance(experience_gap, list) and experience_gap) or (isinstance(experience_gap, str) and experience_gap.strip() != ""):
+            explanation.append(
+                f"⚠️ Experience gap detected: {experience_gap if isinstance(experience_gap, str) else '; '.join(experience_gap)}"
+            )
+            explanation.append(
+                f"Score is low due to the experience gap with required years."
+            )
+        elif score < 60:
+            explanation.append(
+                f"Your resume matches key skills, but your overall ATS score is moderate due to other factors."
+            )
+        else:
+            explanation.append(
+                f"Your resume is a close fit to the job description's requirements! ATS score is high due to both strong skill coverage and semantic relevance."
+            )
     # Add score-specific nudge
     if score < 30 and not explanation:
         explanation.append("The ATS score is very low, indicating your resume is not a good fit for this job based on key skills and content relevance.")
@@ -277,40 +295,43 @@ def explain_ats_score(score, details, matched_skills, missing_skills, jd_skills)
         explanation.append("The ATS score is moderate, with some relevant overlap. Adding more of the employer's required skills and using their wording could improve your match.")
     elif not explanation:
         explanation.append("Great! Your resume covers most key requirements from the job description.")
-
     return "\n\n".join(explanation)
 
+
 def get_recommendations(missing_skills, semantic_similarity, keyword_overlap, score, max_skills_display=6):
+    # Ensure score is in 0-100 range
+    if score <= 1.0:
+        score = score * 100
     parts = []
 
-    # Tone based on score
     if score < 30:
-        tone_prefix = "⚠️ This role appears to be a poor match based on your current resume. "
+        tone_prefix = "⚠️ This role appears to be a poor match."
     elif score < 60:
-        tone_prefix = "This role is a partial match for your resume. "
+        tone_prefix = "This role is a partial match for your resume."
+    elif score < 80:
+        tone_prefix = "👍 Good match detected."
     else:
-        tone_prefix = "✅ Strong alignment detected. "
-
+        tone_prefix = "🌟 Excellent match!"
     parts.append(tone_prefix)
 
-    # Missing Skills Summary
     if missing_skills:
         display_skills = missing_skills[:max_skills_display]
         if len(missing_skills) > max_skills_display:
             skill_text = ", ".join(display_skills) + ", and more"
         else:
             skill_text = ", ".join(display_skills)
-        parts.append(f"Consider adding or emphasizing {skill_text} to better align with the job requirements.")
-
-    # Semantic Similarity Feedback
+        parts.append(
+            f"Consider adding or emphasizing {skill_text} to better align with the job requirements.")
+    
+    # Semantic similarity feedback
     if semantic_similarity < 0.4 and keyword_overlap > 0:
-        parts.append("Your resume includes some relevant terms, but you could rephrase your experience to more closely match the JD's language.")
+        parts.append("Your resume includes some relevant terms, but rephrasing your experience to match the JD's language could help.")
     elif semantic_similarity < 0.25:
-        parts.append("Content similarity with the JD is low; tailoring project and experience descriptions could significantly improve the match rate.")
+        parts.append("Content similarity with the JD is low; tailoring your project and experience descriptions could improve your match rate.")
 
-    # If almost perfect match
+    # If perfect match
     if not missing_skills and score >= 80:
-        parts = ["🌟 Excellent match! Your resume already covers the core skills and aligns well with the job requirements."]
+        return "🌟 Excellent match! Your resume already covers the core skills and aligns well with the job requirements."
 
     return " ".join(parts)
 
