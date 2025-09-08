@@ -142,13 +142,9 @@ function RecruiterDashboard() {
                     {resume.missing_skills || "N/A"}
                   </td>
                   <td className="border border-gray-300 px-2 py-1">
-                    {resume.experience_gap == null ||
-                    resume.experience_gap === ""
-                      ? "No experience gap"
-                      : Number(resume.experience_gap) >= 3
-                      ? "3+ years"
-                      : "Fresher"}
+                    {resume.experience_level || "N/A"}
                   </td>
+
                   <td className="px-4 py-2 space-x-2">
                     <button
                       className="bg-indigo-600 text-white px-3 py-1 rounded-lg hover:bg-indigo-700 transition"
