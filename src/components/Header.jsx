@@ -12,32 +12,35 @@ function Header({ darkMode, setDarkMode }) {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-md">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+    <header className="bg-white dark:bg-gray-900 shadow-md sticky top-0 z-50 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        
         {/* Logo */}
         <Link
           to="/"
-          className="text-xl font-bold text-indigo-600 dark:text-indigo-400"
+          className="text-2xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent tracking-tight"
+          style={{ fontFamily: "'Poppins', sans-serif" }}
         >
           CVisionary
         </Link>
 
         {/* Navigation */}
-        <nav className="space-x-6">
-          <Link to="/" className="hover:text-indigo-500">
-            Home
-          </Link>
+        <nav className="hidden md:flex space-x-6 font-medium">
+          <Link to="/" className="hover:text-indigo-500 transition">Home</Link>
           {user && user.role === "student" && (
-            <Link to="/student" className="hover:text-indigo-500">
+            <Link to="/student" className="hover:text-indigo-500 transition">
               Student Dashboard
             </Link>
           )}
           {user && user.role === "recruiter" && (
-            <Link to="/recruiter" className="hover:text-indigo-500">
+            <Link to="/recruiter" className="hover:text-indigo-500 transition">
               Recruiter Dashboard
             </Link>
           )}
-          <Link to="/scoring-transparency" className="hover:text-indigo-500">
+          <Link
+            to="/scoring-transparency"
+            className="hover:text-indigo-500 transition"
+          >
             How Scoring Works
           </Link>
         </nav>
@@ -47,7 +50,7 @@ function Header({ darkMode, setDarkMode }) {
           {user ? (
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+              className="px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition shadow-sm"
             >
               Logout
             </button>
@@ -55,13 +58,13 @@ function Header({ darkMode, setDarkMode }) {
             <>
               <Link
                 to="/login"
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-sm"
               >
                 Login
               </Link>
               <Link
                 to="/signup"
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition shadow-sm"
               >
                 Signup
               </Link>
@@ -71,9 +74,9 @@ function Header({ darkMode, setDarkMode }) {
           {/* Dark Mode Toggle */}
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="ml-6 px-3 py-2 rounded-md text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+            className="ml-4 px-3 py-2 rounded-lg text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
           >
-            {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
+            {darkMode ? "☀️" : "🌙"}
           </button>
         </div>
       </div>

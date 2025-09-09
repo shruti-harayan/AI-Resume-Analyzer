@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import jsPDF from "jspdf"; 
 
 function ATS() {
   const [resume, setResume] = useState(null);
@@ -11,74 +12,54 @@ function ATS() {
   const [saveStatus, setSaveStatus] = useState("");
   const [resumeText, setResumeText] = useState("");
 
+  const buildPayload = () => ({
+    student_email: user.email,
+    ats_score: result.score,
+    similarity: result.details?.similarity,
+    keyword_overlap: result.details?.keyword_overlap,
+    strictness_factor_applied: result.details?.strictness_factor_applied,
+    matched_skills: result.matched_skills?.join(","),
+    missing_skills: result.missing_skills?.join(","),
+    file_path: result.file_path,
+    experience_gap: Array.isArray(result.experience_gap)
+      ? result.experience_gap.join("; ")
+      : typeof result.experience_gap === "string"
+      ? result.experience_gap
+      : "",
+    overqualified: Array.isArray(result.overqualified)
+      ? result.overqualified.join("; ")
+      : typeof result.overqualified === "string"
+      ? result.overqualified
+      : "",
+    explanation: result.explanation,
+    tips: result.tips,
+    warnings: Array.isArray(result.warnings) ? result.warnings.join("; ") : "",
+  });
+
   const handleSaveResume = async () => {
     if (!result) {
       setSaveStatus("Please calculate ATS score before saving.");
       return;
     }
-
-    console.log("Saving resume with payload:", {
-      student_email: user.email,
-      ats_score: result.score,
-      resume_text: resumeText,
-      similarity: result.details?.similarity,
-      keyword_overlap: result.details?.keyword_overlap,
-      strictness_factor_applied: result.details?.strictness_factor_applied,
-      matched_skills: result.matched_skills?.join(","),
-      missing_skills: result.missing_skills?.join(","),
-      file_path: result.file_path,
-      experience_gap: Array.isArray(result.experience_gap)
-        ? result.experience_gap.join("; ")
-        : typeof result.experience_gap === "string"
-        ? result.experience_gap
-        : "",
-      overqualified: Array.isArray(result.overqualified)
-        ? result.overqualified.join("; ")
-        : typeof result.overqualified === "string"
-        ? result.overqualified
-        : "",
-    });
-
     try {
-      const res = await axios.post("http://localhost:8000/resume/save", {
-        student_email: user.email,
-        ats_score: result.score,
-        resume_text: resumeText,
-        similarity: result.details?.similarity,
-        keyword_overlap: result.details?.keyword_overlap,
-        strictness_factor_applied: result.details?.strictness_factor_applied,
-        matched_skills: result.matched_skills?.join(","),
-        missing_skills: result.missing_skills?.join(","),
-        file_path: result.file_path,
-        experience_gap: Array.isArray(result.experience_gap)
-          ? result.experience_gap.join("; ")
-          : result.experience_gap || "",
-        overqualified: Array.isArray(result.overqualified)
-          ? result.overqualified.join("; ")
-          : result.overqualified || "",
-      });
-
+      const res = await axios.post("http://localhost:8000/resume/save", buildPayload());
       if (res.data.message === "Resume saved successfully") {
-        setSaveStatus("Resume saved successfully!");
-        alert("Resume saved successfully!");
+        setSaveStatus("✅ Resume saved successfully!");
       } else {
-        setSaveStatus("Could not save resume.");
+        setSaveStatus("❌ Could not save resume.");
       }
-    } catch (error) {
-      setSaveStatus("Could not save resume.");
+    } catch {
+      setSaveStatus("❌ Could not save resume.");
     }
   };
 
-  const handleUpload = (e) => {
-    setResume(e.target.files[0]);
-  };
+  const handleUpload = (e) => setResume(e.target.files[0]);
 
   const handleSubmit = async () => {
     if (!resume || !jd) {
       alert("Please upload resume and enter job description");
       return;
     }
-
     const formData = new FormData();
     formData.append("resume", resume);
     formData.append("jd", jd);
@@ -89,7 +70,6 @@ function ATS() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setResult(res.data);
-
       setResumeText(res.data.resume_text || "");
     } catch (err) {
       console.error(err);
@@ -99,6 +79,65 @@ function ATS() {
     }
   };
 
+  // downloads
+  const handleDownloadCSV = () => {
+    if (!result) return;
+    const payload = buildPayload();
+    const headers = Object.keys(payload).join(",");
+    const values = Object.values(payload)
+      .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
+      .join(",");
+    const csv = `${headers}\n${values}`;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "ATS_Report.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const handleDownloadPDF = () => {
+    if (!result) return;
+    const p = buildPayload();
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("ATS Resume Analysis Report", 14, 18);
+    doc.setFontSize(11);
+
+    let y = 30;
+    const addLine = (text) => {
+      const lines = doc.splitTextToSize(text, 180);
+      lines.forEach((ln) => {
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(ln, 14, y);
+        y += 7;
+      });
+    };
+
+    addLine(`Email: ${p.student_email}`);
+    addLine(`ATS Score: ${p.ats_score}%`);
+    addLine(`Similarity: ${p.similarity}`);
+    addLine(`Keyword Overlap: ${p.keyword_overlap}`);
+    addLine(`Strictness Applied: ${p.strictness_factor_applied}`);
+    addLine(`Matched Skills: ${p.matched_skills || "None"}`);
+    addLine(`Missing Skills: ${p.missing_skills || "None"}`);
+    addLine(`Experience Gap: ${p.experience_gap || "None"}`);
+    addLine(`Overqualified: ${p.overqualified || "None"}`);
+    addLine(`Warnings: ${p.warnings || "None"}`);
+    y += 3;
+    addLine("Explanation:");
+    addLine(p.explanation || "-");
+    y += 3;
+    addLine("Tips:");
+    addLine(p.tips || "-");
+
+    doc.save("ATS_Report.pdf");
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center py-10 px-4 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <div className="w-full max-w-3xl bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8">
@@ -106,7 +145,7 @@ function ATS() {
           AI Resume Analyzer
         </h1>
 
-        {/* File Upload + JD Input */}
+        {/* Upload + JD input */}
         <div className="space-y-4">
           <input
             type="file"
@@ -122,7 +161,8 @@ function ATS() {
           />
           <button
             onClick={handleSubmit}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition"
+            disabled={loading}
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold rounded-lg transition"
           >
             {loading ? "Analyzing..." : "Analyze"}
           </button>
@@ -135,7 +175,7 @@ function ATS() {
               Results
             </h2>
 
-            {/* Score Progress Bar */}
+            {/* Score */}
             <div>
               <p className="font-semibold">ATS Score: {result.score}%</p>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mt-2">
@@ -148,11 +188,11 @@ function ATS() {
                       : "bg-red-500"
                   }`}
                   style={{ width: `${result.score}%` }}
-                ></div>
+                />
               </div>
             </div>
 
-            {/* Experience Gap  */}
+            {/* Experience Gap */}
             {Array.isArray(result.experience_gap) &&
             result.experience_gap.length > 0 ? (
               <div>
@@ -173,7 +213,7 @@ function ATS() {
             <div>
               <p className="font-semibold text-green-600">Matched Skills:</p>
               <div className="flex flex-wrap gap-2 mt-1">
-                {result.matched_skills && result.matched_skills.length > 0 ? (
+                {result.matched_skills?.length > 0 ? (
                   result.matched_skills.map((skill, idx) => (
                     <span
                       key={idx}
@@ -240,7 +280,7 @@ function ATS() {
               </div>
             )}
 
-            {/* Notes */}
+            {/* Overqualified */}
             {Array.isArray(result.overqualified) &&
               result.overqualified.length > 0 && (
                 <div>
@@ -255,15 +295,41 @@ function ATS() {
                 </div>
               )}
 
-            <button
-              onClick={handleSaveResume}
-              disabled={!result}
-              className={`bg-indigo-600 text-white rounded px-4 py-2 mt-4 hover:bg-indigo-700 ${
-                !result ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-            >
-              Save Resume
-            </button>
+            {/* Actions: Save + Downloads  */}
+            <div className="flex flex-wrap gap-3 mt-4">
+              <button
+                onClick={handleSaveResume}
+                disabled={!result}
+                className={`bg-indigo-600 text-white rounded px-4 py-2 hover:bg-indigo-700 ${
+                  !result ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                Save Resume
+              </button>
+              <button
+                onClick={handleDownloadCSV}
+                disabled={!result}
+                className={`bg-green-600 text-white rounded px-4 py-2 hover:bg-green-700 ${
+                  !result ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                Download CSV
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                disabled={!result}
+                className={`bg-purple-600 text-white rounded px-4 py-2 hover:bg-purple-700 ${
+                  !result ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                Download PDF
+              </button>
+            </div>
+
+            {/* Save status */}
+            {saveStatus && (
+              <p className="mt-2 text-sm font-medium text-center">{saveStatus}</p>
+            )}
           </div>
         )}
       </div>
