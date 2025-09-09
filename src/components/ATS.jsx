@@ -81,62 +81,78 @@ function ATS() {
 
   // downloads
   const handleDownloadCSV = () => {
-    if (!result) return;
-    const payload = buildPayload();
-    const headers = Object.keys(payload).join(",");
-    const values = Object.values(payload)
-      .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
-      .join(",");
-    const csv = `${headers}\n${values}`;
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "ATS_Report.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
+  if (!result) return;
+  const payload = buildPayload();
+  const rows = [
+    ["Field", "Value"],
+    ["ATS Score", `${payload.ats_score}%`],
+    ["Similarity", payload.similarity],
+    ["Keyword Overlap", payload.keyword_overlap],
+    ["Strictness Applied", payload.strictness_factor_applied],
+    ["Matched Skills", payload.matched_skills || "None"],
+    ["Missing Skills", payload.missing_skills || "None"],
+    ["Experience Gap", payload.experience_gap || "None"],
+    ["Overqualified", payload.overqualified || "None"],
+    ["Warnings", payload.warnings || "None"],
+    ["Explanation", payload.explanation || "-"],
+    ["Tips", payload.tips || "-"],
+  ];
 
-  const handleDownloadPDF = () => {
-    if (!result) return;
-    const p = buildPayload();
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("ATS Resume Analysis Report", 14, 18);
-    doc.setFontSize(11);
+  const csvContent = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute("download", "ATS_Report.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
-    let y = 30;
-    const addLine = (text) => {
-      const lines = doc.splitTextToSize(text, 180);
-      lines.forEach((ln) => {
-        if (y > 280) {
-          doc.addPage();
-          y = 20;
-        }
-        doc.text(ln, 14, y);
-        y += 7;
-      });
-    };
+const handleDownloadPDF = () => {
+  if (!result) return;
+  const p = buildPayload();
+  const doc = new jsPDF();
 
-    addLine(`Email: ${p.student_email}`);
-    addLine(`ATS Score: ${p.ats_score}%`);
-    addLine(`Similarity: ${p.similarity}`);
-    addLine(`Keyword Overlap: ${p.keyword_overlap}`);
-    addLine(`Strictness Applied: ${p.strictness_factor_applied}`);
-    addLine(`Matched Skills: ${p.matched_skills || "None"}`);
-    addLine(`Missing Skills: ${p.missing_skills || "None"}`);
-    addLine(`Experience Gap: ${p.experience_gap || "None"}`);
-    addLine(`Overqualified: ${p.overqualified || "None"}`);
-    addLine(`Warnings: ${p.warnings || "None"}`);
-    y += 3;
-    addLine("Explanation:");
-    addLine(p.explanation || "-");
-    y += 3;
-    addLine("Tips:");
-    addLine(p.tips || "-");
+  // Title
+  doc.setFontSize(18);
+  doc.setTextColor(40, 40, 40);
+  doc.setFont("Arial");
+  doc.text("ATS Resume Analysis Report", 14, 20);
 
-    doc.save("ATS_Report.pdf");
-  };
+  // Reset style for body
+  doc.setFontSize(12);
+  doc.setTextColor(0);
+
+  // Build rows (all inline)
+  const rows = [
+    `ATS Score: ${p.ats_score}%`,
+    `Similarity: ${p.similarity}`,
+    `Keyword Overlap: ${p.keyword_overlap}`,
+    `Strictness Applied: ${p.strictness_factor_applied}`,
+    `Matched Skills: ${p.matched_skills || "None"}`,
+    `Missing Skills: ${p.missing_skills || "None"}`,
+    `Experience Gap: ${p.experience_gap || "None"}`,
+    `Overqualified: ${p.overqualified || "None"}`,
+    `Warnings: ${p.warnings || "None"}`,
+    `Explanation: ${p.explanation || "-"}`,
+    `Tips: ${p.tips || "-"}`,
+  ];
+
+  // Add each row with automatic text wrapping
+  let y = 35;
+  rows.forEach((line) => {
+    const wrapped = doc.splitTextToSize(line, 180);
+    doc.text(wrapped, 14, y);
+    y += wrapped.length * 7;
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+  });
+
+  doc.save("ATS_Report.pdf");
+};
+
 
   return (
     <div className="min-h-screen flex flex-col items-center py-10 px-4 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
