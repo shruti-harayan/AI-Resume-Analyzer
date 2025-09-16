@@ -1,6 +1,6 @@
 # models.py
 
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship
 from database import Base
 from datetime import datetime,timezone
@@ -26,11 +26,11 @@ class Resume(Base):
     similarity = Column(Float, nullable=True)
     keyword_overlap = Column(Float, nullable=True)
     strictness_factor_applied = Column(String, nullable=True)
-    matched_skills = Column(String, nullable=True)   # CSV string of skills
-    missing_skills = Column(String, nullable=True)   # CSV string of skills
-    resume_text = Column(String, nullable=True)         # Store full parsed resume text
+    matched_skills = Column(String, nullable=True)   
+    missing_skills = Column(String, nullable=True)   
     experience_level = Column(String, nullable=True)
     overqualified_msgs = Column(String, nullable=True)
+    resume_text = Column(Text, nullable=True)
 
     # relationship
     student = relationship("User", backref="resumes")
