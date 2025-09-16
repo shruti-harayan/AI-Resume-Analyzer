@@ -42,9 +42,6 @@ function ScoringTransparency() {
               to the job posting.
             </li>
             <li>
-              <b>Skill aliases</b> – maps “c plus plus” → “C++” automatically.
-            </li>
-            <li>
               <b>Strictness penalty</b> – prevents generic resumes from scoring
               high if no skills match.
             </li>
