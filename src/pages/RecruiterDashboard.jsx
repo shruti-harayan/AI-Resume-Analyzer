@@ -5,7 +5,6 @@ function RecruiterDashboard() {
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [skillFilter, setSkillFilter] = useState("");
   const [jdFilter, setJdFilter] = useState("");
 
   // When JD changes, fetch matched resumes from backend
@@ -37,14 +36,6 @@ function RecruiterDashboard() {
     }
   };
 
-  // Filter by skills on top of matched resumes
-  const filteredResumes = resumes.filter((resume) => {
-    if (!resume.matched_skills) return skillFilter === "";
-    return (
-      skillFilter === "" ||
-      resume.matched_skills.toLowerCase().includes(skillFilter.toLowerCase())
-    );
-  });
 
   useEffect(() => {
     const fetchResumes = async () => {
@@ -98,16 +89,7 @@ function RecruiterDashboard() {
   </h2>
 
   <div className="flex flex-col md:flex-row gap-4 w-full">
-    {/* Skill Filter Input */}
-    <input
-      type="text"
-      value={skillFilter}
-      onChange={(e) => setSkillFilter(e.target.value)}
-      placeholder="Filter by skill"
-      className="w-full md:w-1/3 px-4 py-2 border border-gray-300 rounded-lg shadow-sm 
-                 focus:ring-2 focus:ring-indigo-500 focus:outline-none 
-                 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-400"
-    />
+    
 
     {/* Job Description Textarea */}
     <textarea
@@ -139,12 +121,10 @@ function RecruiterDashboard() {
       </button>
 
       {/* Reset Button (only shows when filters are active) */}
-      {(skillFilter.trim() || jdFilter.trim()) && (
+      {( jdFilter.trim()) && (
         <button
           onClick={() => {
-            setSkillFilter("");
-            setJdFilter("");
-            setFilteredResumes(resumes); // reset resumes to full list
+            setJdFilter("");           
           }}
           className="px-6 py-2 font-medium rounded-lg shadow-md focus:outline-none 
                      focus:ring-2 focus:ring-red-500 bg-red-500 text-white hover:bg-red-600 
@@ -158,7 +138,7 @@ function RecruiterDashboard() {
 </div>
 
 {/* Resume Results Section */}
-{filteredResumes.length === 0 ? (
+{resumes.length === 0 ? (
   <p className="text-gray-500 italic dark:text-gray-400">
     No resumes match your filters.
   </p>
@@ -168,7 +148,7 @@ function RecruiterDashboard() {
     <div className="flex items-center mb-4">
       <span className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 
                        px-3 py-1 rounded-full text-sm font-medium shadow-sm">
-        📄 {filteredResumes.length} {filteredResumes.length === 1 ? "resume" : "resumes"} found
+        📄 {resumes.length} {resumes.length === 1 ? "resume" : "resumes"} found
       </span>
     </div>
 
@@ -187,7 +167,7 @@ function RecruiterDashboard() {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-          {filteredResumes.map((resume) => (
+          {resumes.map((resume) => (
             <tr
               key={resume.id}
               className="hover:bg-gray-50 dark:hover:bg-gray-700 transition"
