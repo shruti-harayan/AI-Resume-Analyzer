@@ -6,6 +6,7 @@ function RecruiterDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [jdFilter, setJdFilter] = useState("");
+  const [allResumes, setAllResumes] = useState([]);
 
   // When JD changes, fetch matched resumes from backend
   const handleJDMatch = async () => {
@@ -43,6 +44,7 @@ function RecruiterDashboard() {
         setLoading(true);
         const res = await axios.get("http://localhost:8000/resume/list");
         setResumes(res.data);
+        setAllResumes(res.data); 
       } catch (err) {
         setError("Failed to load resumes");
       } finally {
@@ -124,7 +126,8 @@ function RecruiterDashboard() {
       {( jdFilter.trim()) && (
         <button
           onClick={() => {
-            setJdFilter("");           
+            setJdFilter("");       
+            setResumes(allResumes);  // resets to the main table    
           }}
           className="px-6 py-2 font-medium rounded-lg shadow-md focus:outline-none 
                      focus:ring-2 focus:ring-red-500 bg-red-500 text-white hover:bg-red-600 
