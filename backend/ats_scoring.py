@@ -103,8 +103,12 @@ def extract_dynamic_skills(text, master_skills=MASTER_SKILL_LIST):
         skill_lower = skill.lower()
         if skill_lower in NOISE_WORDS:
             continue
-        # Escape regex special characters in skill
-        pattern = r'\b' + re.escape(skill_lower) + r'\b'
+        # Special logic for skills with non-alphanumeric characters
+        if re.search(r'[^\w]', skill_lower):  # If skill has chars like +, #
+            # Look for exact substring surrounded by word boundaries or punctuation, case insensitive
+            pattern = r'(?<!\w)' + re.escape(skill_lower) + r'(?!\w)'
+        else:
+            pattern = r'\b' + re.escape(skill_lower) + r'\b'
         if re.search(pattern, text_lower):
             found.add(skill_lower)
     return found
@@ -179,12 +183,13 @@ def calc_experience_years(periods):
 
 def extract_skill_experience(text):
     exp_skill = {}
-    # Skip generic "for this role"/"for this job"
-    generic_words = {"role", "job", "position", "for", "this", "the", "in", "with"}
-    pattern = r"(\d+)\s*\+?\s*(?:years?|yrs?|yoe)\s+(?:of\s+experience\s+)?(?:in|with|for)?\s*([a-zA-Z0-9_]+)"
+    generic_words = {"role", "job", "position", "for", "this", "the", "in", "with", "of", "experience"}
+    # Make skill optional, but only add if present and non-generic
+    pattern = r"(\d+)\s*\+?\s*(?:years?|yrs?|yoe)\s+(?:of\s+experience\s+)?(?:in|with|for)?\s*([a-zA-Z0-9_]+)?"
     matches = re.findall(pattern, text, re.IGNORECASE)
     for years, skill in matches:
-        skill_name = skill.strip().lower()
+        # Only add if skill is present and not generic
+        skill_name = (skill or "").strip().lower()
         if skill_name and skill_name not in generic_words:
             exp_skill[skill_name] = int(years)
     return exp_skill
@@ -192,7 +197,7 @@ def extract_skill_experience(text):
 
 def detect_numeric_experience(text):
     """Detect explicit mentions like '5 years of experience'."""
-    exp_match = re.search(r"(\d+)\s*\+?\s*(?:years?|yrs?|yoe)\b", text, re.IGNORECASE)
+    exp_match = re.search(r"(\d+)\s*\+?\s*(?:years?|yrs?|yoe?|years of experience)\b", text, re.IGNORECASE)
     return int(exp_match.group(1)) if exp_match else None
 
 
