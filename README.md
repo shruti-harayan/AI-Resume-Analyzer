@@ -113,7 +113,10 @@ Final Score = (0.5 × Semantic Similarity) + (0.5 × Keyword Overlap)
 
 ### 🏠 Homepage
 
-![Homepage](./screenshots/homepage.png)
+![Homepage](<img width="1877" height="540" alt="Screenshot 2025-09-11 222424" src="https://github.com/user-attachments/assets/a1c4750e-6097-42c4-ab1b-06411f30dc24" />
+)(<img width="1919" height="871" alt="Screenshot 2025-09-11 222445" src="https://github.com/user-attachments/assets/6dd60648-4830-4441-bad7-26af6140ac1e" />
+)(<img width="1910" height="893" alt="Screenshot 2025-09-11 222504" src="https://github.com/user-attachments/assets/a88aaed4-87cd-4786-8dac-bb9e15065568" />
+)
 
 ### 🔐 Login & Signup
 
@@ -183,8 +186,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 * Matched Skills: `Python, Flask`
 * Missing Skills: `Django, Microservices, NumPy`
 * Experience Gap: `3+ years required, 0 found`
-
-(Example inspired from your results page in documentation)
 
 ---
 
