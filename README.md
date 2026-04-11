@@ -193,16 +193,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 ---
 
-## 🎯 Future Enhancements
-
-* 🔄 Fine-tuned SBERT models
-* ⚖️ Bias detection (AI fairness)
-* 🌐 Integration with job portals
-* 📊 Advanced analytics dashboard
-* 🤖 Real-time learning from recruiter feedback
-
----
-
 ## 🤝 Contribution
 
 Contributions are welcome!
@@ -225,7 +215,7 @@ This project is licensed under the **MIT License**.
 ## 👩‍💻 Author
 
 **Shruti Harayan**
-MSc IT | AI Resume Analyzer Project
+MSc IT academic topper | Research-based Project | Published Research Paper
 
 ---
 
