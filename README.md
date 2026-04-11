@@ -129,6 +129,7 @@ Final Score = (0.5 × Semantic Similarity) + (0.5 × Keyword Overlap)
 
 ### 📊 ATS Result
 <img width="1019" height="821" alt="Screenshot 2025-09-11 225139" src="https://github.com/user-attachments/assets/4d6dce00-8f00-4efd-94f2-5297162354ae" />
+<img width="503" height="395" alt="image" src="https://github.com/user-attachments/assets/cb4a464c-6ddb-4ea2-a626-bedf9af5e65f" />
 
 
 ### 📈 How Scoring Works
@@ -140,9 +141,7 @@ Final Score = (0.5 × Semantic Similarity) + (0.5 × Keyword Overlap)
 
 ### 🧑‍💼 Recruiter Dashboard
 
-<img width="1563" height="857" alt="Screenshot 2025-09-17 143913" src="https://github.com/user-attachments/assets/bdfce44e-3d4e-4246-90f6-9f7744900a8f" />
 <img width="1574" height="662" alt="Screenshot 2025-09-17 144019" src="https://github.com/user-attachments/assets/a4bfcba2-a03b-4696-b162-c4fb67c2ffbb" />
-
 
 ---
 
