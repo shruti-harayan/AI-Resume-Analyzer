@@ -123,20 +123,26 @@ Final Score = (0.5 × Semantic Similarity) + (0.5 × Keyword Overlap)
 <img width="585" height="559" alt="Screenshot 2025-09-11 223955" src="https://github.com/user-attachments/assets/c7155524-e7a0-4780-9ad2-fe68f4d63a45" />
 
 ### 🎓 Student Dashboard
+<img width="1334" height="714" alt="Screenshot 2025-09-11 224207" src="https://github.com/user-attachments/assets/a114b021-0e1a-421a-b97a-7f804751c462" />
+<img width="1084" height="701" alt="Screenshot 2025-09-11 225102" src="https://github.com/user-attachments/assets/70bf56e1-f6e5-4466-a751-b77f8602e130" />
 
-![Student Dashboard](./screenshots/student-dashboard.png)
 
 ### 📊 ATS Result
+<img width="1019" height="821" alt="Screenshot 2025-09-11 225139" src="https://github.com/user-attachments/assets/4d6dce00-8f00-4efd-94f2-5297162354ae" />
 
-![ATS Result](./screenshots/ats-result.png)
 
 ### 📈 How Scoring Works
+<img width="1267" height="872" alt="Screenshot 2025-09-12 163907" src="https://github.com/user-attachments/assets/0cb112f0-3632-42e7-839f-d9b3ca955c5a" />
+<img width="825" height="787" alt="Screenshot 2025-09-12 163958" src="https://github.com/user-attachments/assets/c418ee10-4acc-469c-b412-3af09dc98465" />
+<img width="1550" height="777" alt="Screenshot 2025-09-12 164059" src="https://github.com/user-attachments/assets/e5448ae1-39a4-409a-96f8-6b132e954553" />
 
-![Scoring](./screenshots/scoring.png)
+
 
 ### 🧑‍💼 Recruiter Dashboard
 
-![Recruiter Dashboard](./screenshots/recruiter-dashboard.png)
+<img width="1563" height="857" alt="Screenshot 2025-09-17 143913" src="https://github.com/user-attachments/assets/bdfce44e-3d4e-4246-90f6-9f7744900a8f" />
+<img width="1574" height="662" alt="Screenshot 2025-09-17 144019" src="https://github.com/user-attachments/assets/a4bfcba2-a03b-4696-b162-c4fb67c2ffbb" />
+
 
 ---
 
