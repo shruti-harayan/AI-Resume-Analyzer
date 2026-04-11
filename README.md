@@ -113,15 +113,16 @@ Final Score = (0.5 × Semantic Similarity) + (0.5 × Keyword Overlap)
 
 ### 🏠 Homepage
 
-![Homepage](<img width="1877" height="540" alt="Screenshot 2025-09-11 222424" src="https://github.com/user-attachments/assets/a1c4750e-6097-42c4-ab1b-06411f30dc24" />
-)(<img width="1919" height="871" alt="Screenshot 2025-09-11 222445" src="https://github.com/user-attachments/assets/6dd60648-4830-4441-bad7-26af6140ac1e" />
-)(<img width="1910" height="893" alt="Screenshot 2025-09-11 222504" src="https://github.com/user-attachments/assets/a88aaed4-87cd-4786-8dac-bb9e15065568" />
-)
+(<img width="1877" height="540" alt="Screenshot 2025-09-11 222424" src="https://github.com/user-attachments/assets/a1c4750e-6097-42c4-ab1b-06411f30dc24" />)
+(<img width="1919" height="871" alt="Screenshot 2025-09-11 222445" src="https://github.com/user-attachments/assets/6dd60648-4830-4441-bad7-26af6140ac1e" />)
+(<img width="1910" height="893" alt="Screenshot 2025-09-11 222504" src="https://github.com/user-attachments/assets/a88aaed4-87cd-4786-8dac-bb9e15065568" />)
 
 ### 🔐 Login & Signup
 
-![Login](./screenshots/login.png)
-![Signup](./screenshots/signup.png)
+![Signup](<img width="478" height="474" alt="Screenshot 2025-09-11 224146" src="https://github.com/user-attachments/assets/0db699c9-17ed-4db9-a78e-824c74564a1e" />
+)
+![Login](<img width="585" height="559" alt="Screenshot 2025-09-11 223955" src="https://github.com/user-attachments/assets/c7155524-e7a0-4780-9ad2-fe68f4d63a45" />
+)
 
 ### 🎓 Student Dashboard
 
