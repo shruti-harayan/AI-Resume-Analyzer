@@ -22,3 +22,6 @@ passlib[bcrypt]==1.7.4
 email-validator
 python-multipart
 jspdf
+httpx
+groq
+python-dotenv
