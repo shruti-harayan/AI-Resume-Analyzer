@@ -1,9 +1,9 @@
 # auth_utils.py
 from passlib.context import CryptContext
 from datetime import datetime, timedelta,timezone
-import jwt
+import jwt,os
 
-SECRET_KEY = "4fff949e372d7d10efa58dd30d738b1765761ec8009db7d4a0256be77cdb6dfa"  
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

@@ -1,33 +1,42 @@
-from fastapi import FastAPI, UploadFile, Form
+from fastapi import FastAPI, HTTPException, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
-import ats_scoring as ats,os
-import pdfplumber,docx,models,database,io,uvicorn
+import ats_scoring as ats, os,uuid
+import pdfplumber, docx, models, database, io, uvicorn
 from auth import router as auth_router
 from resume import router as resume_router
+from llm_routes import router as llm_router   
+from dotenv import load_dotenv
 
-
+load_dotenv()
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
 app.include_router(auth_router)
-models.Base.metadata.create_all(bind=database.engine)
 app.include_router(resume_router)
+app.include_router(llm_router)               
 
+models.Base.metadata.create_all(bind=database.engine)
 UPLOAD_FOLDER = "uploads"
+
 
 def save_uploaded_file(file_bytes: bytes, filename: str) -> str:
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-    file_location = os.path.join(UPLOAD_FOLDER, filename)
+
+    # generate safe unique filename
+    safe_name = f"{uuid.uuid4()}_{filename}"
+
+    file_location = os.path.join(UPLOAD_FOLDER, safe_name)
+
     with open(file_location, "wb") as f:
         f.write(file_bytes)
+
     return file_location
 
 
@@ -49,10 +58,23 @@ def parse_file(content: bytes, filename: str) -> str:
 @app.post("/analyze/")
 async def analyze_resume(resume: UploadFile, jd: str = Form(...)):
     content = await resume.read()
-    saved_file_path = save_uploaded_file(content,resume.filename)
-    resume_text = parse_file(content,resume.filename)
+
+    MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+    ALLOWED_EXTENSIONS = [".pdf", ".docx"]
+
+    ext = os.path.splitext(resume.filename)[1].lower()
+
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Only PDF/DOCX allowed")
+
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File too large (max 5MB)")
+
+    saved_file_path = save_uploaded_file(content, resume.filename)
+        
+    resume_text = parse_file(content, resume.filename)
     if not resume_text.strip():
-        return {"error": "Could not extract text from resume"}
+        raise HTTPException(status_code=400, detail="Could not extract text from resume")
 
     result = ats.ats_score_dynamic(
         resume_text, jd,
@@ -75,8 +97,7 @@ async def analyze_resume(resume: UploadFile, jd: str = Form(...)):
     warnings = ats.ats_unfriendly_features(resume_text)
 
     if result.get("experience_gap"):
-        warnings.append(result["experience_gap"])
-
+        warnings.extend(result["experience_gap"])   # extend, not append — gap is already a list
 
     return {
         "score": result["score"],
@@ -91,7 +112,7 @@ async def analyze_resume(resume: UploadFile, jd: str = Form(...)):
         "explanation": explanation,
         "warnings": warnings,
         "tips": result["tips"],
-        "experience_gap": result["experience_gap"],  
+        "experience_gap": result["experience_gap"],
         "overqualified": result["overqualified"],
         "file_path": saved_file_path
     }
