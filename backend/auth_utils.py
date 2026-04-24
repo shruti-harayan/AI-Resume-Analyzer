@@ -1,8 +1,10 @@
 # auth_utils.py
+from dotenv import load_dotenv
 from passlib.context import CryptContext
 from datetime import datetime, timedelta,timezone
 import jwt,os
 
+load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
