@@ -332,7 +332,8 @@ def extract_csv_skills(text, master_skills=MASTER_SKILL_LIST):
             #  NEW: partial phrase match
             words = skill_lower.split()
             if len(words) > 1:
-                if any(w in text_lower for w in words):
+                # ONLY allow full phrase match (no partial word match)
+                if re.search(r'\b' + re.escape(skill_lower) + r'\b', text_lower):
                     found.add(normalize_skill(skill_lower))
     return found
 
@@ -556,7 +557,7 @@ def filter_irrelevant_skills(skills, reference_text):
     ref_text = reference_text.lower()
 
     for skill in skills:
-        if skill in ref_text:
+        if re.search(r'\b' + re.escape(skill) + r'\b', ref_text):
             filtered.add(skill)
 
     return filtered
@@ -646,7 +647,8 @@ def ats_score_dynamic(resume_text, jd_text, sim_weight=0.4, key_weight=0.6, top_
     #  APPLY ALIAS NORMALIZATION HERE
     jd_skills = map_to_canonical(jd_skills)
     resume_skills = map_to_canonical(resume_skills)
-
+    jd_skills = strict_jd_skill_validation(jd_skills, jd_text)
+    
     # ── Step 4: Semantic similarity (unchanged) ──
     sim = calc_similarity(resume_clean, jd_clean)
 
