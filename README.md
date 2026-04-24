@@ -2,7 +2,9 @@
 
 # 🚀 AI Resume Analyzer (CVisionary)
 
-An **AI-powered Resume Analyzer** that uses **Natural Language Processing (NLP)** and **Semantic Similarity (SBERT)** to evaluate resumes against job descriptions and provide **ATS scores, skill gaps, and actionable feedback**.
+An **AI-powered Resume Analyzer** that evaluates resumes against job descriptions using **semantic similarity, hybrid ATS scoring, and LLM-based feedback**.
+
+Built to simulate **real recruiter evaluation** — not just keyword matching.
 
 ---
 
@@ -18,6 +20,7 @@ This project solves these issues using:
 
 * ✅ Semantic understanding (SBERT)
 * ✅ Hybrid scoring (Semantic + Keywords)
+* ✅ Alias normalization (real-world skill mapping)
 * ✅ Explainable AI feedback
 * ✅ Skill gap detection
 
@@ -48,17 +51,21 @@ This project solves these issues using:
 
 ### 🧠 AI Features
 
-* SBERT semantic similarity
-* Keyword overlap analysis
-* Hybrid scoring system
-* Explainable feedback system
+- SBERT semantic similarity
+- Hybrid skill matching (exact + semantic)
+- Alias normalization (e.g., *spreadsheet → Excel*)
+- Composite skill handling (*planning & scheduling*)
+- LLM-powered:
+  - Resume bullet rewriting
+  - Resume improvement suggestions
+  - Interview questions
 
 ---
 
 ## 🧮 How Scoring Works
 
 ```
-Final Score = (0.5 × Semantic Similarity) + (0.5 × Keyword Overlap)
+Final Score = (0.4 × Semantic Similarity) + (0.6 × Keyword Overlap)
 ```
 
 * 📌 **Semantic Similarity** → SBERT embeddings
@@ -72,14 +79,15 @@ Final Score = (0.5 × Semantic Similarity) + (0.5 × Keyword Overlap)
 
 ### Frontend
 
-* React.js
+* React.js (Vite)
 * Tailwind CSS
 
 ### Backend
 
 * FastAPI (Python)
 * spaCy (NLP)
-* Sentence-BERT (SBERT)
+* Sentence-BERT (Sentence Transformers)
+* Groq API (LLM)
 
 ### Database
 
@@ -99,10 +107,9 @@ Final Score = (0.5 × Semantic Similarity) + (0.5 × Keyword Overlap)
 │   └── models.py
 │
 ├── frontend/
-│   ├── ATS.jsx
-│   ├── StudentDashboard.jsx
-│   ├── RecruiterDashboard.jsx
-│   └── Login.jsx
+│   ├── src/
+│ ├── components/
+│ └── pages/
 │
 └── README.md
 ```
@@ -159,6 +166,7 @@ cd ai-resume-analyzer
 ```bash
 cd backend
 pip install -r requirements.txt
+python -m spacy download en_core_web_sm
 uvicorn main:app --reload
 ```
 
