@@ -46,8 +46,8 @@ function ScoringTransparency() {
               high if no skills match.
             </li>
             <li>
-              <b>Balanced scoring</b> – 50% semantic similarity + 50% keyword
-              overlap.
+              <b>Weighted scoring</b> – 40% semantic similarity + 60% keyword
+              overlap for ATS realism.
             </li>
             <li>
               <b>Readable explanations</b> – you see exactly <i>why</i> you got
@@ -73,6 +73,22 @@ function ScoringTransparency() {
               <b>Fairness protections</b> – freshers cannot game senior roles,
               ensuring realistic matches.
             </li>
+            <li>
+              <b>Hybrid skill matching</b> – combines exact keyword match with
+              semantic similarity.
+            </li>
+            <li>
+              <b>Alias normalization</b> – maps variations like "spreadsheet" →
+              "Excel".
+            </li>
+            <li>
+              <b>Composite skill handling</b> – understands phrases like
+              "planning & scheduling".
+            </li>
+            <li>
+              <b>LLM-assisted extraction</b> – Groq enhances skill detection
+              beyond static lists.
+            </li>
           </ul>
         </section>
 
@@ -89,34 +105,40 @@ function ScoringTransparency() {
             function using:
           </p>
           <pre className="bg-gray-100 dark:bg-gray-900 p-5 rounded-xl text-sm overflow-x-auto mb-6 border border-gray-200 dark:border-gray-700">
-            {`Final Score = (sim_weight × semantic_similarity) 
-             + (key_weight × keyword_overlap)
+            {`Final Score = (0.4 × semantic_similarity) 
+             + (0.6 × keyword_overlap)
 
-semantic_similarity = SBERT cosine similarity between resume & JD text (0–1).
-keyword_overlap     = Matched skills ÷ JD skills (0–1).
-Weights             = sim_weight = 0.5, key_weight = 0.5.
+semantic_similarity = SBERT cosine similarity between resume & JD (0–1)
+keyword_overlap     = Matched skills ÷ JD skills (0–1)
 
-Strictness factor:
-If keyword_overlap == 0 → semantic_similarity × 0.5
+🔹 Matching method:
+- Exact keyword matching
+- Semantic skill matching (SBERT)
+- Alias normalization (e.g., "spreadsheet" → "excel")
+- Composite skill handling (e.g., "planning & scheduling")
 
-Experience gap penalty:
-If resume YOE < JD requirement → score × 0.6 (40% reduction)`}
+🔹 Strictness adjustment:
+If keyword_overlap < 0.1 → semantic score slightly reduced
+(prevents generic resumes from scoring high)
+
+🔹 Experience penalty:
+If experience gap detected → score × 0.6 (40% reduction)
+
+🔹 Final output:
+Score is scaled to 0–100 and rounded`}
           </pre>
 
           <p className="mb-4 font-semibold text-lg">Example:</p>
           <ul className="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
             <li>Semantic similarity = 0.60 (60%)</li>
-            <li>Keyword overlap = 0.25 (25%)</li>
+            <li>Keyword overlap = 0.50 (50%)</li>
             <li>
-              Final Score = (0.5 × 0.60) + (0.5 × 0.25) ={" "}
-              <b className="text-indigo-600 dark:text-indigo-400">42.5%</b>
+              Final Score = (0.4 × 0.60) + (0.6 × 0.50) ={" "}
+              <b className="text-indigo-600 dark:text-indigo-400">54%</b>
             </li>
+            <li>If overlap is very low → slight semantic penalty applied.</li>
             <li>
-              If no skills match → penalty applied →{" "}
-              <b className="text-red-500">15%</b>
-            </li>
-            <li>
-              If JD requires 10+ YOE but resume shows 2 years → score reduced by{" "}
+              If experience gap exists → score reduced by{" "}
               <b className="text-red-500">40%</b>.
             </li>
           </ul>
@@ -149,7 +171,9 @@ If resume YOE < JD requirement → score × 0.6 (40% reduction)`}
               <ul className="list-disc list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <li>Hybrid: semantic similarity + keyword overlap.</li>
                 <li>Strictness penalty reduces false positives.</li>
-                <li>Experience gap detection (underqualified/overqualified).</li>
+                <li>
+                  Experience gap detection (underqualified/overqualified).
+                </li>
                 <li>Employment date parsing for accurate YOE.</li>
                 <li>Actionable recruiter-style recommendations.</li>
                 <li>Transparent formula & open explanations.</li>
