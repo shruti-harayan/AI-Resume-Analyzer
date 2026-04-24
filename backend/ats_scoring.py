@@ -6,11 +6,14 @@ from unidecode import unidecode
 from sentence_transformers import SentenceTransformer, util
 from datetime import datetime
 from groq import Groq
-import os
+import os,csv
 
 # Load spaCy and SBERT
 nlp = spacy.load("en_core_web_sm")
 sbert_model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+csv_path = os.path.join(BASE_DIR, "skill_aliases.csv")
 
 # Noise words list
 NOISE_WORDS = set(spacy.lang.en.stop_words.STOP_WORDS).union({
@@ -50,34 +53,55 @@ def map_to_canonical(skills):
 
     return mapped
 
-import csv
+def clean_text(text):
+    if not text:
+        return ""
+
+    text = unidecode(text)
+    text = text.lower()
+
+    # Standardize YOE
+    text = re.sub(r"\bYOE\b", "years of experience", text, flags=re.I)
+
+    # Replace punctuation with space (safe)
+    text = re.sub(r"[^\w\s+]", " ", text)
+
+    # Prevent word merging
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
+
 
 def load_skill_aliases(csv_path="skill_aliases.csv"):
     aliases_map = {}
-
     try:
-        with open(csv_path, newline='', encoding='utf-8') as f:
-            reader = csv.reader(f)
 
-            for row in reader:
-                if len(row) < 2:
+        with open(csv_path, encoding='utf-8') as f:
+            for line in f:
+                if ',' not in line:
                     continue
 
-                canonical = row[0].strip().lower()
-                aliases_str = row[1].strip().lower()
+                canonical, aliases_str = line.strip().split(',', 1)
 
-                aliases = [a.strip() for a in aliases_str.split("|") if a.strip()]
+                # skip header
+                if "canonical" in canonical.lower():
+                    continue
+
+                canonical = canonical.strip().lower().strip('"')
+                aliases = [
+                    a.strip().lower().strip('"')
+                    for a in aliases_str.split("|")
+                    if a.strip()
+                ]
 
                 aliases_map[canonical] = aliases
-
         return aliases_map
 
     except Exception as e:
         print(f"❌ Error loading aliases CSV: {e}")
         return {}
     
-SKILL_ALIASES = load_skill_aliases("skill_aliases.csv")
-
+SKILL_ALIASES = load_skill_aliases(csv_path)
 
 # ─────────────────────────────────────────────────────────────────
 # Comprehensive noise filter — concepts, qualifications, and vague
@@ -305,13 +329,14 @@ def clean_text(text):
 
 
 def normalize_text_for_skills(text):
-    """Replace known aliases with canonical forms."""
     text_norm = text.lower()
+
     for canonical, aliases in SKILL_ALIASES.items():
         for alias in aliases:
-            text_norm = re.sub(r'\b' + re.escape(alias) + r'\b', canonical, text_norm)
-    return text_norm
+            pattern = r'(?<!\w)' + re.escape(alias) + r'(?!\w)'
+            text_norm = re.sub(pattern, canonical, text_norm)
 
+    return text_norm
 
 # Dynamic Skill Extraction — CSV-based (fast, deterministic)
 def extract_csv_skills(text, master_skills=MASTER_SKILL_LIST):
@@ -647,8 +672,10 @@ def ats_score_dynamic(resume_text, jd_text, sim_weight=0.4, key_weight=0.6, top_
     #  APPLY ALIAS NORMALIZATION HERE
     jd_skills = map_to_canonical(jd_skills)
     resume_skills = map_to_canonical(resume_skills)
+   
     jd_skills = strict_jd_skill_validation(jd_skills, jd_text)
-    
+
+
     # ── Step 4: Semantic similarity (unchanged) ──
     sim = calc_similarity(resume_clean, jd_clean)
 
@@ -674,11 +701,11 @@ def ats_score_dynamic(resume_text, jd_text, sim_weight=0.4, key_weight=0.6, top_
         sim *= 0.95
 
     score = sim_weight * sim + key_weight * overlap
-    
-
+   
     exp_gap, overqualified = check_experience_gap(resume_text, jd_text)
     if exp_gap:
         score *= 0.6  # 40% reduction
+
 
     return {
         "score": round(score * 100),
@@ -791,7 +818,7 @@ def get_recommendations(missing_skills, semantic_similarity, keyword_overlap, sc
 
 
 
-def semantic_skill_match(resume_skills, jd_skills, threshold=0.45):
+def semantic_skill_match(resume_skills, jd_skills, threshold=0.35):
     matched = set()
     missing = set(jd_skills)
 
