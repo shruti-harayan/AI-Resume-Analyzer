@@ -19,3 +19,8 @@
 "nlp,natural language processing"
 "docker,docker container|docker containers"
 "kubernetes,k8s"
+"excel,spreadsheet|ms excel|spreadsheets"
+"communication,meetings|client meetings|status meetings|coordination"
+"documentation,documentation procedures|project documentation"
+"reporting,reports|dashboards|presentations"
+"scheduling,project scheduling|timeline|timelines"
