@@ -135,7 +135,8 @@ Final Score = (0.4 × Semantic Similarity) + (0.6 × Keyword Overlap)
 
 ### 📊 ATS Result
 <img width="1160" height="668" alt="Screenshot 2026-04-24 155422" src="https://github.com/user-attachments/assets/7db493f3-6dec-49bd-8cd6-3af516ea8ebc" />
-<img width="1022" height="764" alt="Screenshot 2026-04-24 155439" src="https://github.com/user-attachments/assets/dfe03151-62eb-4999-a4f6-3512e888fc50" />
+<img width="448" height="323" alt="image" src="https://github.com/user-attachments/assets/1e2d9077-ba33-4576-9e17-521658533f6f" />
+
 
 ### Cover Letter Generation
 <img width="1036" height="795" alt="Screenshot 2026-04-24 155548" src="https://github.com/user-attachments/assets/e3b3b001-5eff-4b03-b37a-db8d766e93e0" />
