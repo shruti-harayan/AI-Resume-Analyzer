@@ -130,25 +130,37 @@ Final Score = (0.4 × Semantic Similarity) + (0.6 × Keyword Overlap)
 <img width="585" height="559" alt="Screenshot 2025-09-11 223955" src="https://github.com/user-attachments/assets/c7155524-e7a0-4780-9ad2-fe68f4d63a45" />
 
 ### 🎓 Student Dashboard
-<img width="1334" height="714" alt="Screenshot 2025-09-11 224207" src="https://github.com/user-attachments/assets/a114b021-0e1a-421a-b97a-7f804751c462" />
-<img width="1084" height="701" alt="Screenshot 2025-09-11 225102" src="https://github.com/user-attachments/assets/70bf56e1-f6e5-4466-a751-b77f8602e130" />
-
+<img width="1907" height="895" alt="Screenshot 2026-04-24 155244" src="https://github.com/user-attachments/assets/96ace654-5ee0-4126-a776-899849ba402f" />
+<img width="1237" height="750" alt="Screenshot 2026-04-24 155407" src="https://github.com/user-attachments/assets/73178baf-df29-4ba8-84fc-fad171574939" />
 
 ### 📊 ATS Result
-<img width="1019" height="821" alt="Screenshot 2025-09-11 225139" src="https://github.com/user-attachments/assets/4d6dce00-8f00-4efd-94f2-5297162354ae" />
-<img width="503" height="395" alt="image" src="https://github.com/user-attachments/assets/cb4a464c-6ddb-4ea2-a626-bedf9af5e65f" />
+<img width="1160" height="668" alt="Screenshot 2026-04-24 155422" src="https://github.com/user-attachments/assets/7db493f3-6dec-49bd-8cd6-3af516ea8ebc" />
+<img width="1022" height="764" alt="Screenshot 2026-04-24 155439" src="https://github.com/user-attachments/assets/dfe03151-62eb-4999-a4f6-3512e888fc50" />
+
+### Cover Letter Generation
+<img width="1036" height="795" alt="Screenshot 2026-04-24 155548" src="https://github.com/user-attachments/assets/e3b3b001-5eff-4b03-b37a-db8d766e93e0" />
+
+### Interview Question Generator
+<img width="1037" height="791" alt="Screenshot 2026-04-24 155611" src="https://github.com/user-attachments/assets/185bd76c-eb47-44d1-8507-c797436a6d3d" />
+
+### Resume Rewriter
+<img width="1028" height="780" alt="Screenshot 2026-04-24 155657" src="https://github.com/user-attachments/assets/75bf57b5-f16c-44b3-a3e9-242960770b2e" />
+<img width="1039" height="596" alt="Screenshot 2026-04-24 155727" src="https://github.com/user-attachments/assets/9f2e1b4f-9f47-42ca-b4d1-fad461c81e27" />
+<img width="894" height="770" alt="Screenshot 2026-04-24 155822" src="https://github.com/user-attachments/assets/16b5ab6c-1aa7-444a-9be4-bb10039052fb" />
 
 
 ### 📈 How Scoring Works
-<img width="1267" height="872" alt="Screenshot 2025-09-12 163907" src="https://github.com/user-attachments/assets/0cb112f0-3632-42e7-839f-d9b3ca955c5a" />
-<img width="825" height="787" alt="Screenshot 2025-09-12 163958" src="https://github.com/user-attachments/assets/c418ee10-4acc-469c-b412-3af09dc98465" />
-<img width="1550" height="777" alt="Screenshot 2025-09-12 164059" src="https://github.com/user-attachments/assets/e5448ae1-39a4-409a-96f8-6b132e954553" />
-
-
+<img width="964" height="838" alt="Screenshot 2026-04-24 155850" src="https://github.com/user-attachments/assets/1179bb37-81ae-4cef-9e7d-84dd1c90a023" />
+<img width="984" height="889" alt="Screenshot 2026-04-24 155908" src="https://github.com/user-attachments/assets/71c1a0be-1eda-493d-b0d1-de48a69a91b0" />
+<img width="1344" height="871" alt="Screenshot 2026-04-24 155925" src="https://github.com/user-attachments/assets/14a151f4-5c9d-4cb8-b389-49ac9466cd75" />
 
 ### 🧑‍💼 Recruiter Dashboard
 
 <img width="1574" height="662" alt="Screenshot 2025-09-17 144019" src="https://github.com/user-attachments/assets/a4bfcba2-a03b-4696-b162-c4fb67c2ffbb" />
+
+### Downloaded ATS Result
+<img width="494" height="778" alt="Screenshot 2026-04-24 160450" src="https://github.com/user-attachments/assets/b05ba27a-21b9-4b66-a033-bf9612e448ae" />
+<img width="681" height="516" alt="Screenshot 2026-04-24 160503" src="https://github.com/user-attachments/assets/93d90ce9-f1a3-4b25-a48a-9057d5b47422" />
 
 ---
 
