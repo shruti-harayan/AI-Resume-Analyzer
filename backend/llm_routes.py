@@ -6,7 +6,7 @@ from groq import Groq
 import os
 
 router = APIRouter(prefix="/llm", tags=["LLM"])
-MODEL = "llama-3.1-8b-instant" 
+MODEL = "openai/gpt-oss-120b" 
 
 def get_groq_client():
     api_key = os.getenv("GROQ_API_KEY")

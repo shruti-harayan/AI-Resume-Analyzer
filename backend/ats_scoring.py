@@ -291,7 +291,7 @@ SOFT_SKILLS: item1, item2"""
 
         response = client.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
-            model="llama-3.1-8b-instant",
+            model="openai/gpt-oss-120b",
             max_tokens=200,
             temperature=0.0,
         )
